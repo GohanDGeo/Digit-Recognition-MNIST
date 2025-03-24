@@ -116,7 +116,6 @@ canvas_result = st_canvas(
 def preprocess_image(img):
     img = img.resize((28, 28), Image.ANTIALIAS)  # Resize to MNIST format
     img = img.convert("L")  # Convert to grayscale
-    img.save("image1.png")
     img = transforms.ToTensor()(img).unsqueeze(0)  # Convert to tensor and add batch dim
     return img
 
