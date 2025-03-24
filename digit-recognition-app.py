@@ -7,6 +7,8 @@ import torchvision.transforms as transforms
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
 
+torch.classes.__path__ = []
+
 # Parent class for the network, so both a network with linear layers and a CNN network can be tested.
 class DigitClassifier(nn.Module):
     
@@ -114,7 +116,7 @@ canvas_result = st_canvas(
 
 # Transform function to process the drawn image
 def preprocess_image(img):
-    img = img.resize((28, 28), Image.ANTIALIAS)  # Resize to MNIST format
+    img = img.resize((28, 28), Image.Resampling.LANCZOS)  # Resize to MNIST format
     img = img.convert("L")  # Convert to grayscale
     img = transforms.ToTensor()(img).unsqueeze(0)  # Convert to tensor and add batch dim
     return img
