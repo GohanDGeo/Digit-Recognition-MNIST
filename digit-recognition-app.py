@@ -4,9 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
-import numpy as np
 from streamlit_drawable_canvas import st_canvas
-from PIL import Image, ImageOps
+from PIL import Image
 
 # Parent class for the network, so both a network with linear layers and a CNN network can be tested.
 class DigitClassifier(nn.Module):
@@ -94,8 +93,12 @@ model.load_state_dict(torch.load(file_path, map_location=torch.device("cpu")))
 model.eval()  # Set to evaluation mode
 
 # Streamlit App
-st.title("🎨 MNIST Digit Recognizer")
-st.write("Draw a digit below and let the model predict it!")
+st.set_page_config(
+        page_title="Digit Recognizer",
+)
+
+st.title("💾Digit Recognizer\n(Trained on MNIST)")
+st.write("Draw a digit below and see if the model recognizes it!")
 
 # Create a drawing canvas
 canvas_result = st_canvas(
@@ -130,5 +133,4 @@ if canvas_result.image_data is not None:
     
     # Show Prediction
     st.write(f"**Predicted Digit: {predicted.item()}**")
-    st.write(probs)
     st.bar_chart(probs.numpy().flatten())  # Display probabilities for each digit

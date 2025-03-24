@@ -1,0 +1,5 @@
+streamlit
+os
+torch
+PIL
+streamlit_drawable_canvas
