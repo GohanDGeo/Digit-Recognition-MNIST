@@ -8,6 +8,7 @@ import numpy as np
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image, ImageOps
 
+# Parent class for the network, so both a network with linear layers and a CNN network can be tested.
 class DigitClassifier(nn.Module):
     
     def __init__(self) -> None:
@@ -16,6 +17,13 @@ class DigitClassifier(nn.Module):
     def forward(self, x):
         raise NotImplementedError("Subclasses must implement forward method") 
 
+    # A function tha trains the network based on the given train data, optimizer and criterion.
+    # args:
+    # @train_loader -> The dataloader for the train data
+    # @optimizer ->  The optimizer to be used during training
+    # @criterion -> The criterion to be used for training
+    # @num_epochs -> The number of epochs to train for
+    # @verbose -> Set to True if training updates are to be printed out
     def train_model(self, train_loader, optimizer, criterion, num_epochs=10, verbose=True):
         for epoch in range(num_epochs):
             running_loss = 0.0
@@ -31,7 +39,12 @@ class DigitClassifier(nn.Module):
                 print(f"Epoch {epoch+1}, Loss: {running_loss/len(train_loader)}")
         if verbose:
             print("Training Complete!")
+        return running_loss/len(train_loader)
 
+    # A function that runs the model on test data.
+    # args:
+    # @test_loader -> The dataloader for the test data
+    # @verbose -> Set to True if test accuracy is to be printed out
     def test_model(self, test_loader, verbose=True):
         correct = 0
         total = 0
@@ -50,27 +63,28 @@ class DigitClassifier(nn.Module):
         if verbose:
             print(f"Test Accuracy: {accuracy:.2f}%")
 
+        return accuracy
 
-
+# A subclass of DigitClassifier that uses Convolutional Layers and maxpooling
 class CNNDigitClassifier(DigitClassifier):
     
     def __init__(self) -> None:
         super(CNNDigitClassifier, self).__init__()
 
-        self.conv1 = nn.Conv2d(1, 10, kernel_size=5)
-        self.conv2 = nn.Conv2d(10, 20, kernel_size=5)
+        self.conv1 = nn.Conv2d(1, 16, kernel_size=3)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3)
         self.conv2_drop = nn.Dropout2d()
-        self.fc1 = nn.Linear(320, 50)
+        self.fc1 = nn.Linear(800, 50)
         self.fc2 = nn.Linear(50, 10)
 
     def forward(self, x):
         x = F.relu(F.max_pool2d(self.conv1(x), 2))
         x = F.relu(F.max_pool2d(self.conv2_drop(self.conv2(x)), 2))
-        x = x.view(-1, 320)
+        x = x.view(-1, 800)
         x = F.relu(self.fc1(x))
         x = F.dropout(x, training=self.training)
         x = self.fc2(x)
-        return F.log_softmax(x)
+        return F.log_softmax(x, -1)
     
 file_path = os.path.join("network-files", "mnist_model.pth")
 
